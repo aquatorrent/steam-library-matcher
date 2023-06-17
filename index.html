@@ -1,0 +1,376 @@
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    </head>
+
+    <body>
+        <main>
+            <div class="container">
+                <h1 class="mt-5 mb-4">Steam Library Matcher!</h1>
+                <form>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h4 class="card-title">Steam Web API key</h4>
+                            <div class="card-subtitle text-body-secondary mb-2">Steam Web API key can be found <a href="https://steamcommunity.com/dev/apikey">here</a>. Your key won't be used for anywhere except for hitting <a href="https://developer.valvesoftware.com/wiki/Steam_Web_API#GetOwnedGames_.28v0001.29">this</a> (GetOwnedGames) and <a href="https://partner.steamgames.com/doc/webapi/ISteamUser">this</a> (GetPlayerSummaries) endpoint.</div>
+                            <div class="card-subtitle text-body-secondary mb-2"><b>DO NOT</b> share your Steam Web API key to untrusted sites!</div>
+                            <div class="card-text">
+                                <input class="form-control" id="key" placeholder="insert dev API key"></input>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row py-3">
+                        <div class="col-12">
+                            <h4>User lists</h4>
+                            <div class="text-body-secondary mb-2">Only Steam IDs (https://steamcommunity.com/profiles/xxxx/) are supported. Use <a href="https://steamrep.com/">SteamRep</a> to convert custom URL to Steam ID.</a></div>
+                        </div>
+                        <div class="row" id="textField">
+                            <div class="col-3">
+                                <input class="form-control" name="username" placeholder="insert Steam profile ID"></input>
+                            </div>
+                            <div class="col-3 d-flex gap-2" id="buttons">
+                                <button class="btn btn-primary d-inline-flex align-items-center" id="plus" type="button">+</button>
+                                <button class="btn btn-primary d-inline-flex align-items-center" id="search" type="button">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <hr class="col-3 col-md-2"></hr>
+                <div class="row py-3">
+                    <div class="col-12">
+                        <h4>Game lists</h4>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table table-striped" id="gameTable">
+                                <thead>
+                                    <tr>
+                                        <th id="sortGame" style="cursor:pointer">Game</th>
+                                        <th id="sortOwned" style="cursor:pointer">Owned by</th>
+                                        <th id="sortNotPlayed" style="cursor:pointer">Not played by</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gameField">
+                                    <tr>
+                                        <td style="width:30%"><a href="https://steamcommunity.com/app/318600"><img src="https://cdn.akamai.steamstatic.com/steam/apps/318600/capsule_184x69.jpg"></a> <a href="https://steamcommunity.com/app/318600">The Flame in the Flood</a></td>
+                                        <td style="width:35%">
+                                            <a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                                                <figure class="figure">
+                                                    <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                                            </figure></a>
+                                            <a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                                                <figure class="figure">
+                                                    <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                                                </figure></a>
+                                            <a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                                                <figure class="figure">
+                                                    <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                                            </figure></a>
+                                        <td style="width:35%"><a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                                            <figure class="figure">
+                                                <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                                        </figure></a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="loading" tabindex="-1" aria-labelledby="loadingModal" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-body d-flex flex-row justify-content-center">
+                            <div class="d-inline-flex spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="d-inline-flex p-2">Please wait</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <script>
+            {
+                let userMatchMap = new Map();
+                let userInfoMap = new Map();
+
+                function createNewField() {
+                    let wrapper = document.createElement('div');
+                    wrapper.className="col-3";
+                    let elem = document.createElement('input');
+                    elem.className = "form-control";
+                    elem.setAttribute('name', "username");
+                    elem.setAttribute('placeholder', "insert Steam profile ID");
+                    wrapper.appendChild(elem);
+                    return wrapper;
+                }
+
+                function convertNameToString(dom) {
+                    let res = [];
+                    for (let i = 0; i < dom.length; i++) {
+                        res.push(dom[i].value);
+                    } 
+                    return res;
+                }
+
+                function fetchUserGames(username) {
+                    let apiKey = document.getElementById('key').value;
+                    let url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
+                    return fetch(url);
+                }
+
+                function fetchUserInfo(usernames) {
+                    let apiKey = document.getElementById('key').value;
+                    let url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="+apiKey+"&format=json&steamids="+usernames;
+                    return fetch(url);
+                }
+
+                function fetchUserGamesBulk(usernames) {
+                    let res = new Map();
+
+                    let promises = []
+                    promises.push(fetchUserInfo(usernames));
+                    for (let i = 0; i < usernames.length; i++) {
+                        let username = usernames[i];
+                        promises.push(fetchUserGames(username));
+                    } 
+                    Promise.all(promises)
+                    .then((responses) => {
+                        return Promise.all(responses.map(response => response.json()));
+                    }).then(function(data){
+                        fillUserInfoMap(data[0]);
+                        for (let j=1; j < data.length; j++) {
+                            res.set(usernames[j-1], data[j].response.games);
+                        }
+                        matchUserGames(res);
+                        reconstructTable();
+                    }).catch(function(error){
+                        alert("error fetching user games");
+                        console.log(error);
+                    });
+                }
+
+                function fillUserInfoMap(user) {
+                    userInfoMap = new Map();
+
+                    user.response.players.forEach((v, k) => {
+                        userInfoMap.set(v.steamid, {
+                            username: v.personaname,
+                            userImg: v.avatarmedium,
+                            profileURL: v.profileurl,
+                        })
+                    })
+                }
+
+                function matchUserGames(games) {
+                    userMatchMap = new Map();
+
+                    let minPlaytimeMin = 10;
+                    games.forEach((v, k) => {
+                        let listGames = games.get(k);
+                        for (let j=0; j < listGames.length; j++) {
+                            let game = listGames[j];
+                            let notPlayed = 0;
+                            if (game.playtime_forever <= 10) {
+                                notPlayed = 1;
+                            }
+                            if (userMatchMap.has(game.appid)) {
+                                let temp = userMatchMap.get(game.appid);
+                                temp.countOwn.push(k);
+                                if (notPlayed == 1) {
+                                    temp.countNotPlayed.push(k);
+                                }
+                                userMatchMap.set(game.appid, temp);
+                            } else {
+                                let temp = {
+                                    name: game.name,
+                                    countOwn: [k],
+                                    countNotPlayed: [],
+                                };
+                                if (notPlayed == 1) {
+                                    temp.countNotPlayed = [k];
+                                }
+                                userMatchMap.set(game.appid, temp);
+                            }
+                        }
+                    });
+                    
+                    return userMatchMap;
+                }
+
+                function createUserElement(username) {
+                    /* element format
+                    <a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                        <figure class="figure">
+                            <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                    </figure></a>
+                    */
+                    if (!userInfoMap.has(username)) {
+                        return;
+                    }
+                    let user = userInfoMap.get(username);
+
+                    let link = document.createElement('a');
+                    link.setAttribute('class', 'px-2');
+                    link.setAttribute('href', user.profileURL);
+                    let figure = document.createElement('figure');
+                    figure.setAttribute('class', 'figure')
+                    let img = document.createElement('img');
+                    img.setAttribute('src', user.userImg);
+                    figure.append(img);
+                    let div = document.createElement('div');
+                    div.innerHTML = user.username;
+                    figure.append(div);
+                    link.append(figure);
+                    return link;
+                }
+
+                function reconstructTable(){
+                    /* table format
+                    <tr>
+                        <td style="width:35%">
+                            <a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                                <figure class="figure">
+                                    <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                            </figure></a>
+                            <a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                                <figure class="figure">
+                                    <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                                </figure></a>
+                            <a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                                <figure class="figure">
+                                    <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                            </figure></a>
+                        <td style="width:35%"><a class="px-2" href="https://steamcommunity.com/profiles/76561198132503739/">
+                            <figure class="figure">
+                                <img src="https://avatars.steamstatic.com/e54eb463825d20a5402a4bfa412c1ac4f64710a1_medium.jpg"><div>aquatorrent</div>
+                        </figure></a></td>
+                    </tr>
+                    */
+                    let gameField = document.getElementById('gameField');
+                    gameField.innerHTML = "";
+
+                    userMatchMap.forEach((v,k) => {
+                        let appID = k;
+                        let gameName = v.name;
+
+                        let tr = document.createElement('tr');
+
+                        let td1 = document.createElement('td');
+                        td1.setAttribute('style', 'width:30%');
+                        let linkGame1 = document.createElement('a');
+                        linkGame1.setAttribute('href', "https://steamcommunity.com/app/"+appID);
+                        let imgGame = document.createElement('img');
+                        imgGame.setAttribute('src', "https://cdn.akamai.steamstatic.com/steam/apps/"+appID+"/capsule_184x69.jpg");
+                        linkGame1.append(imgGame);                        
+                        let linkGame2 = document.createElement('a');
+                        linkGame2.setAttribute('href', "https://steamcommunity.com/app/"+appID);
+                        linkGame2.innerHTML = gameName;
+                        td1.append(linkGame1);
+                        td1.innerHTML += " ";
+                        td1.append(linkGame2);
+                        tr.append(td1);
+
+                        let td2 = document.createElement('td');
+                        td2.setAttribute('style', 'width:35%');
+                        v.countOwn.forEach((v2,k2) => {
+                            td2.append(createUserElement(v2));
+                        });
+                        tr.append(td2);
+
+                        let td3 = document.createElement('td');
+                        td3.setAttribute('style', 'width:35%');
+                        v.countNotPlayed.forEach((v2,k2) => {
+                            td3.append(createUserElement(v2));
+                        });
+                        tr.append(td3);
+
+                        gameField.append(tr);
+                    })
+                    setTimeout(function() {
+                        //your code to be executed after 1 second
+                        loadingModal.hide();
+                    }, 1000);
+                }
+
+                let plusButton = document.getElementById('plus');
+                let textField = document.getElementById('textField');
+                let buttons = document.getElementById('buttons');
+                let search = document.getElementById('search');
+                let sortGame = document.getElementById('sortGame');
+                let sortOwned = document.getElementById('sortOwned');
+                let sortNotPlayed = document.getElementById('sortNotPlayed');
+                let loadingModal = new bootstrap.Modal(document.getElementById('loading'), {backdrop: 'static', keyboard: false});
+
+                plusButton.onclick = function() {
+                    textField.insertBefore(createNewField(), buttons);
+                }
+                search.onclick = function() {
+                    loadingModal.show();
+                    let domNames = document.getElementsByName("username");
+                    usernames = convertNameToString(domNames);
+                    if (usernames.length > 0) {
+                        userGames = fetchUserGamesBulk(usernames);
+                    }
+                }
+
+                let gameAsc = false;
+                sortGame.onclick = function() {
+                    loadingModal.show();
+                    userMatchMap = new Map([...userMatchMap.entries()].sort(function(a, b) { 
+                        if (gameAsc === true) {
+                            if (a[1].name < b[1].name) {
+                                return -1;
+                            }
+                            if (a[1].name > b[1].name) {
+                                return 1;
+                            }
+                            return 0;
+                        } else {
+                            if (a[1].name < b[1].name) {
+                                return 1;
+                            }
+                            if (a[1].name > b[1].name) {
+                                return -1;
+                            }
+                            return 0;
+                        }
+                    }));
+                    gameAsc = !gameAsc;
+                    reconstructTable();
+                }
+
+                let ownedAsc = false;
+                sortOwned.onclick = function() {
+                    loadingModal.show();
+                    userMatchMap = new Map([...userMatchMap.entries()].sort(function(a, b) { 
+                        if (ownedAsc === true) {
+                            return a[1].countOwn.length - b[1].countOwn.length;
+                        } else {
+                            return b[1].countOwn.length - a[1].countOwn.length;
+                        }
+                    }));
+                    ownedAsc = !ownedAsc;
+                    reconstructTable();
+                }
+
+                let notPlayedAsc = false;
+                sortNotPlayed.onclick = function() {
+                    loadingModal.show();
+                    userMatchMap = new Map([...userMatchMap.entries()].sort(function(a, b) { 
+                        if (notPlayedAsc === true) {
+                            return a[1].countNotPlayed.length - b[1].countNotPlayed.length;
+                        } else {
+                            return b[1].countNotPlayed.length - a[1].countNotPlayed.length;
+                        }
+                    }));
+                    notPlayedAsc = !notPlayedAsc;
+                    reconstructTable();
+                }
+            }
+        </script>
+    </body>
+</html>
