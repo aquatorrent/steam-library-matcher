@@ -118,7 +118,7 @@
 
                 function fetchUserGames(username) {
                     let apiKey = document.getElementById('key').value;
-                    let url = "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
+                    let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
                     return fetch(url);
                 }
 
@@ -150,7 +150,7 @@
                     }).catch(function(error){
                         alert("error fetching user games");
                         console.log(error);
-                        
+
                         setTimeout(function() {
                             //your code to be executed after 1 second
                             loadingModal.hide();
