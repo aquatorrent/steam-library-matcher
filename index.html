@@ -150,6 +150,11 @@
                     }).catch(function(error){
                         alert("error fetching user games");
                         console.log(error);
+                        
+                        setTimeout(function() {
+                            //your code to be executed after 1 second
+                            loadingModal.hide();
+                        }, 1000);
                     });
                 }
 
