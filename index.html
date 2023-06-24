@@ -134,6 +134,8 @@
 
                 function fetchUserGamesBulk(usernames) {
                     var regexNum=/^[0-9]+$/;
+
+                    // do not hit server if input is invalid
                     var regexAlphaNum=/^[a-zA-Z0-9]+$/;
                     let apiKey = document.getElementById('key').value;
                     if (!apiKey.match(regexAlphaNum)) {
@@ -142,6 +144,7 @@
                             //your code to be executed after 1 second
                             loadingModal.hide();
                         }, 1000);
+                        return;
                     }
 
                     let res = new Map();
@@ -154,12 +157,13 @@
                             promises.push(fetchUserGames(username));
                         }
                     } 
-                    if(promises.length <= 0) {
+                    if(promises.length <= 1) {
                         alert("no username to be checked");
                         setTimeout(function() {
                             //your code to be executed after 1 second
                             loadingModal.hide();
                         }, 1000);
+                        return;
                     }
 
                     Promise.all(promises)
