@@ -96,6 +96,7 @@
             {
                 let userMatchMap = new Map();
                 let userInfoMap = new Map();
+                let listUserGames = new Map();
 
                 function createNewField() {
                     let wrapper = document.createElement('div');
@@ -152,15 +153,30 @@
                     let res = new Map();
 
                     let promises = []
-                    promises.push(fetchUserInfo(usernames));
+                    let usernameList = "";
+                    let fetchedUsernames = [];
                     for (let i = 0; i < usernames.length; i++) {
                         let username = usernames[i];
                         if (username.match(regexNum)) {
-                            promises.push(fetchUserGames(username));
+                            if (listUserGames.has(username)) {
+                                res.set(username, listUserGames.get(username));
+                            } else {
+                                fetchedUsernames.push(username);
+                                promises.push(fetchUserGames(username));
+                            }
+
+                            if (!userInfoMap.has(username)) {
+                                if (usernameList != ""){
+                                    usernameList  += ",";
+                                }
+                                usernameList += username;
+                            }
                         }
                     } 
+                    if (usernameList != "") {
+                        promises.push(fetchUserInfo(usernameList));
+                    }
                     if(promises.length <= 1) {
-                        alert("no username to be checked");
                         setTimeout(function() {
                             //your code to be executed after 1 second
                             loadingModal.hide();
@@ -172,9 +188,14 @@
                     .then((responses) => {
                         return Promise.all(responses.map(response => response.json()));
                     }).then(function(data){
-                        fillUserInfoMap(data[0]);
-                        for (let j=1; j < data.length; j++) {
-                            res.set(usernames[j-1], data[j].response.games);
+                        let length = data.length;
+                        if(usernameList != "") {
+                            length = data.length-1
+                            fillUserInfoMap(data[data.length-1]);
+                        }
+                        for (let j=0; j < length; j++) {
+                            res.set(fetchedUsernames[j], data[j].response.games);
+                            listUserGames.set(fetchedUsernames[j], data[j].response.games);
                         }
                         matchUserGames(res);
                         reconstructTable();
@@ -190,8 +211,6 @@
                 }
 
                 function fillUserInfoMap(user) {
-                    userInfoMap = new Map();
-
                     user.response.players.forEach((v, k) => {
                         userInfoMap.set(v.steamid, {
                             username: v.personaname,
