@@ -120,7 +120,7 @@
                     let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
                     // changed to this site to prevent cors
-                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getownedgames.php?steamid="+username+"&format=json&include_appinfo=true";
+                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getownedgames?steamid="+username+"&format=json&include_appinfo=true";
                     return fetch(url);
                 }
 
@@ -128,7 +128,7 @@
                     let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="+apiKey+"&format=json&steamids="+usernames;
                     // changed to this site to prevent cors
-                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getplayersummaries.php?format=json&steamid="+usernames;
+                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getplayersummaries?format=json&steamid="+usernames;
                     return fetch(url);
                 }
 
