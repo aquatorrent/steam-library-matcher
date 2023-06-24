@@ -119,14 +119,14 @@
                 function fetchUserGames(username) {
                     //let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
-                    let url = "https://slm.free.nf/getownedgames.php?steamid="+username+"&format=json&include_appinfo=true";
+                    let url = "http://slm.free.nf/getownedgames.php?steamid="+username+"&format=json&include_appinfo=true";
                     return fetch(url);
                 }
 
                 function fetchUserInfo(usernames) {
                     //let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="+apiKey+"&format=json&steamids="+usernames;
-                    let url = "https://slm.free.nf/getplayersummaries.php?format=json&steamids="+usernames;
+                    let url = "http://slm.free.nf/getplayersummaries.php?format=json&steamids="+usernames;
                     return fetch(url);
                 }
 
