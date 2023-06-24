@@ -121,8 +121,8 @@
                     let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
                     // changed to this site to prevent cors
-                    //let url = "https://superb-semolina-4be8e2.netlify.app/api/getownedgames?steamid="+username+"&key="+apiKey;
-                    let url = "http://127.0.0.1:3000/api/getownedgames?steamid="+username+"&key="+apiKey;
+                    let url = "https://superb-semolina-4be8e2.netlify.app/api/getownedgames?steamid="+username+"&key="+apiKey;
+                    //let url = "http://127.0.0.1:3000/api/getownedgames?steamid="+username+"&key="+apiKey;
                     return fetch(url);
                 }
 
@@ -130,8 +130,8 @@
                     let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="+apiKey+"&format=json&steamids="+usernames;
                     // changed to this site to prevent cors
-                    //let url = "https://superb-semolina-4be8e2.netlify.app/api/getplayersummaries?steamid="+usernames+"&key="+apiKey;
-                    let url = "http://127.0.0.1:3000/api/getplayersummaries?steamid="+usernames+"&key="+apiKey;
+                    let url = "https://superb-semolina-4be8e2.netlify.app/api/getplayersummaries?steamid="+usernames+"&key="+apiKey;
+                    //let url = "http://127.0.0.1:3000/api/getplayersummaries?steamid="+usernames+"&key="+apiKey;
                     return fetch(url);
                 }
 
