@@ -120,7 +120,7 @@
                     let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
                     // changed to this site to prevent cors
-                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getownedgames?steamid="+username+"&format=json&include_appinfo=true";
+                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getownedgames?steamid="+username+"&key="+apiKey;
                     return fetch(url);
                 }
 
@@ -128,19 +128,40 @@
                     let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="+apiKey+"&format=json&steamids="+usernames;
                     // changed to this site to prevent cors
-                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getplayersummaries?format=json&steamid="+usernames;
+                    let url = "https://6496dcbfdf9c3f521ca942ac--superb-semolina-4be8e2.netlify.app/api/getplayersummaries?steamid="+usernames+"&key="+apiKey;
                     return fetch(url);
                 }
 
                 function fetchUserGamesBulk(usernames) {
+                    var regexNum=/^[0-9]+$/;
+                    var regexAlphaNum=/^[a-zA-Z0-9]+$/;
+                    let apiKey = document.getElementById('key').value;
+                    if (!apiKey.match(regexAlphaNum)) {
+                        alert("fill api key first");
+                        setTimeout(function() {
+                            //your code to be executed after 1 second
+                            loadingModal.hide();
+                        }, 1000);
+                    }
+
                     let res = new Map();
 
                     let promises = []
                     promises.push(fetchUserInfo(usernames));
                     for (let i = 0; i < usernames.length; i++) {
                         let username = usernames[i];
-                        promises.push(fetchUserGames(username));
+                        if (username.match(regexNum)) {
+                            promises.push(fetchUserGames(username));
+                        }
                     } 
+                    if(promises.length <= 0) {
+                        alert("no username to be checked");
+                        setTimeout(function() {
+                            //your code to be executed after 1 second
+                            loadingModal.hide();
+                        }, 1000);
+                    }
+
                     Promise.all(promises)
                     .then((responses) => {
                         return Promise.all(responses.map(response => response.json()));
