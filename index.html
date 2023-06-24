@@ -9,7 +9,7 @@
             <div class="container">
                 <h1 class="mt-5 mb-4">Steam Library Matcher!</h1>
                 <form>
-                    <div class="card mb-3">
+                    <!--<div class="card mb-3">
                         <div class="card-body">
                             <h4 class="card-title">Steam Web API key</h4>
                             <div class="card-subtitle text-body-secondary mb-2">Steam Web API key can be found <a href="https://steamcommunity.com/dev/apikey">here</a>. Your key won't be used for anywhere except for hitting <a href="https://developer.valvesoftware.com/wiki/Steam_Web_API#GetOwnedGames_.28v0001.29">this</a> (GetOwnedGames) and <a href="https://partner.steamgames.com/doc/webapi/ISteamUser">this</a> (GetPlayerSummaries) endpoint.</div>
@@ -18,7 +18,7 @@
                                 <input class="form-control" id="key" placeholder="insert dev API key"></input>
                             </div>
                         </div>
-                    </div>
+                    </div>-->
                     <div class="row py-3">
                         <div class="col-12">
                             <h4>User lists</h4>
@@ -118,13 +118,15 @@
 
                 function fetchUserGames(username) {
                     let apiKey = document.getElementById('key').value;
-                    let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
+                    //let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
+                    let url = "https://slm.free.nf/getownedgames.php?steamid="+username+"&format=json&include_appinfo=true";
                     return fetch(url);
                 }
 
                 function fetchUserInfo(usernames) {
                     let apiKey = document.getElementById('key').value;
-                    let url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="+apiKey+"&format=json&steamids="+usernames;
+                    //let url = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key="+apiKey+"&format=json&steamids="+usernames;
+                    let url = "https://slm.free.nf/getplayersummaries.php?key="+apiKey+"&format=json&steamids="+usernames;
                     return fetch(url);
                 }
 
