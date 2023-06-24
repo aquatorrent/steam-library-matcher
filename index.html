@@ -96,7 +96,7 @@
             {
                 let userMatchMap = new Map();
                 let userInfoMap = new Map();
-                let listUserGames = new Map();
+                //let listUserGames = new Map();
 
                 function createNewField() {
                     let wrapper = document.createElement('div');
@@ -158,12 +158,12 @@
                     for (let i = 0; i < usernames.length; i++) {
                         let username = usernames[i];
                         if (username.match(regexNum)) {
-                            if (listUserGames.has(username)) {
-                                res.set(username, listUserGames.get(username));
-                            } else {
+                            // if (listUserGames.has(username)) {
+                            //     res.set(username, listUserGames.get(username));
+                            // } else {
                                 fetchedUsernames.push(username);
                                 promises.push(fetchUserGames(username));
-                            }
+                            //}
 
                             if (!userInfoMap.has(username)) {
                                 if (usernameList != ""){
@@ -195,7 +195,7 @@
                         }
                         for (let j=0; j < length; j++) {
                             res.set(fetchedUsernames[j], data[j].response.games);
-                            listUserGames.set(fetchedUsernames[j], data[j].response.games);
+                            //listUserGames.set(fetchedUsernames[j], data[j].response.games);
                         }
                         matchUserGames(res);
                         reconstructTable();
