@@ -153,8 +153,12 @@
                     promises.push(fetchUserInfo(usernames));
                     for (let i = 0; i < usernames.length; i++) {
                         let username = usernames[i];
-                        if (username.match(regexNum) && !userMatchMap[username]) {
-                            promises.push(fetchUserGames(username));
+                        if (username.match(regexNum)) {
+                            if(userMatchMap.has(username)) {
+                                res.set(username, userMatchMap.get(username));
+                            } else {
+                                promises.push(fetchUserGames(username));
+                            }
                         }
                     } 
                     if(promises.length <= 1) {
