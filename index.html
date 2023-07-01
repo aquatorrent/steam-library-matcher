@@ -78,7 +78,7 @@
                 </div>
             </div>
 
-            <!-- Modal -->
+            <!-- Loading modal -->
             <div class="modal fade" id="loading" tabindex="-1" aria-labelledby="loadingModal" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-sm">
                     <div class="modal-content">
@@ -92,6 +92,20 @@
                 </div>
             </div>
         </main>
+
+        <!-- Error modal -->
+        <div class="modal fade" id="error" tabindex="-1" aria-labelledby="errorModal" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body d-flex flex-row justify-content-center">
+                        <div class="d-inline-flex p-2" id="modalErrorContent"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
+                </div>
+            </div>
+        </div>
         <script>
             {
                 let userMatchMap = new Map();
@@ -121,8 +135,8 @@
                     let apiKey = document.getElementById('key').value;
                     //let url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+apiKey+"&steamid="+username+"&format=json&include_appinfo=true";
                     // changed to this site to prevent cors
-                    let url = "https://superb-semolina-4be8e2.netlify.app/api/getownedgames?steamid="+username+"&key="+apiKey;
-                    //let url = "http://127.0.0.1:3000/api/getownedgames?steamid="+username+"&key="+apiKey;
+                    let url = "https://superb-semolina-4be8e2.netlify.app/api/getownedgames?steamid="+username+"&key="+apiKey+"&include_appinfo=true";
+                    //let url = "http://127.0.0.1:3000/api/getownedgames?steamid="+username+"&key="+apiKey+"&include_appinfo=true";
                     return fetch(url);
                 }
 
@@ -142,11 +156,12 @@
                     var regexAlphaNum=/^[a-zA-Z0-9]+$/;
                     let apiKey = document.getElementById('key').value;
                     if (!apiKey.match(regexAlphaNum)) {
-                        alert("fill api key first");
                         setTimeout(function() {
                             //your code to be executed after 1 second
                             loadingModal.hide();
                         }, 1000);
+                        modalErrorContent.innerHTML = "fill api key first";
+                        errorModal.show();
                         return;
                     }
 
@@ -194,13 +209,14 @@
                             fillUserInfoMap(data[data.length-1]);
                         }
                         for (let j=0; j < length; j++) {
-                            res.set(fetchedUsernames[j], data[j].response.games);
+                            res.set(fetchedUsernames[j], data[j]);
                             //listUserGames.set(fetchedUsernames[j], data[j].response.games);
                         }
                         matchUserGames(res);
                         reconstructTable();
                     }).catch(function(error){
-                        alert("error fetching user games");
+                        modalErrorContent.innerHTML = "error fetching user games: <br>" + error;
+                        errorModal.show();
                         console.log(error);
 
                         setTimeout(function() {
@@ -211,11 +227,10 @@
                 }
 
                 function fillUserInfoMap(user) {
-                    user.response.players.forEach((v, k) => {
+                    user.forEach((v, k) => {
                         userInfoMap.set(v.steamid, {
                             username: v.personaname,
                             userImg: v.avatarmedium,
-                            profileURL: v.profileurl,
                         })
                     })
                 }
@@ -229,7 +244,7 @@
                         for (let j=0; j < listGames.length; j++) {
                             let game = listGames[j];
                             let notPlayed = 0;
-                            if (game.playtime_forever <= 10) {
+                            if (game.playtime <= 10) {
                                 notPlayed = 1;
                             }
                             if (userMatchMap.has(game.appid)) {
@@ -270,7 +285,7 @@
 
                     let link = document.createElement('a');
                     link.setAttribute('class', 'px-2');
-                    link.setAttribute('href', user.profileURL);
+                    link.setAttribute('href', 'https://steamcommunity.com/profiles/'+username+'/');
                     let figure = document.createElement('figure');
                     figure.setAttribute('class', 'figure')
                     let img = document.createElement('img');
@@ -359,6 +374,8 @@
                 let sortOwned = document.getElementById('sortOwned');
                 let sortNotPlayed = document.getElementById('sortNotPlayed');
                 let loadingModal = new bootstrap.Modal(document.getElementById('loading'), {backdrop: 'static', keyboard: false});
+                let errorModal = new bootstrap.Modal(document.getElementById('error'));
+                let modalErrorContent = document.getElementById('modalErrorContent');
 
                 plusButton.onclick = function() {
                     textField.insertBefore(createNewField(), buttons);
